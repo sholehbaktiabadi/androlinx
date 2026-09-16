@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=AndroLinx
+GenericName=Android Screen Mirroring
+Comment=Mirror and control an Android phone from your desktop
+Exec=androlinx
+Icon=io.github.sholehbaktiabadi.AndroLinx
+Terminal=false
+Categories=Utility;GTK;
+Keywords=android;adb;scrcpy;mirror;mirroring;screen;phone;cast;usb;wireless;
+StartupNotify=true
+StartupWMClass=io.github.sholehbaktiabadi.AndroLinx

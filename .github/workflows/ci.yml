@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests and data files
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # Deliberately without python3-gi: the test suite must not import gi, so
+      # that debian/rules can run it inside a build chroot. If someone adds an
+      # import of gi to a module the tests touch, this step is what catches it.
+      - name: Run the test suite
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Byte-compile every module
+        run: python3 -m compileall -q src
+
+      - name: Install validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends desktop-file-utils appstream
+
+      - name: Validate the desktop entry
+        run: desktop-file-validate data/io.github.sholehbaktiabadi.AndroLinx.desktop
+
+      - name: Validate the AppStream metadata
+        run: |
+          appstreamcli validate --no-net \
+            data/io.github.sholehbaktiabadi.AndroLinx.metainfo.xml
+
+  package:
+    name: Build the package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential debhelper dh-python pybuild-plugin-pyproject \
+            python3-all python3-setuptools fakeroot lintian
+
+      - name: Build with debhelper
+        run: dpkg-buildpackage -us -uc -b
+
+      - name: Run lintian
+        run: lintian --no-tag-display-limit ../androlinx_*.deb || true
+
+      # The fallback builder is maintained by hand and would otherwise drift
+      # from debian/ without anyone noticing. Comparing the file lists of the
+      # two packages is the only thing that catches it. Python metadata that
+      # pybuild generates (dist-info, egg-info) is excluded: the fallback has
+      # no reasonable way to produce it, and nothing in the app reads it.
+      - name: Build with the fallback script
+        run: ./tools/build-deb.sh /tmp/fallback
+
+      - name: Compare the two packages
+        run: |
+          dpkg-deb -c ../androlinx_*_all.deb \
+            | awk '{print $6}' | grep -vE 'egg-info|dist-info|__pycache__' | sort > /tmp/dh.list
+          dpkg-deb -c /tmp/fallback/androlinx_*_all.deb \
+            | awk '{print $6}' | sort > /tmp/fallback.list
+          diff -u /tmp/dh.list /tmp/fallback.list
+
+      # Not `apt-get install`: this runner is Ubuntu 24.04, whose archive has
+      # libadwaita 1.5 and scrcpy 2.1, so the dependencies cannot be satisfied
+      # there however correct the package is. Unpacking it and running the
+      # launcher tests the same thing -- that the contents are in the right
+      # place and work -- without needing to resolve anything.
+      - name: Check the package contents work
+        run: |
+          set -eu
+          root=$(mktemp -d)
+          dpkg-deb -x ../androlinx_*_all.deb "$root"
+          test -x "$root/usr/bin/androlinx"
+          test -f "$root/usr/share/applications/io.github.sholehbaktiabadi.AndroLinx.desktop"
+          test -f "$root/usr/share/icons/hicolor/scalable/apps/io.github.sholehbaktiabadi.AndroLinx.svg"
+          test -f "$root/usr/share/metainfo/io.github.sholehbaktiabadi.AndroLinx.metainfo.xml"
+          test -f "$root/usr/share/man/man1/androlinx.1.gz"
+          PYTHONPATH="$root/usr/lib/python3/dist-packages" \
+            python3 "$root/usr/bin/androlinx" --version
+
+      - name: Check the declared dependencies are the ones we expect
+        run: |
+          dpkg-deb -f ../androlinx_*_all.deb Depends | tr ',' '\n' | sed 's/^ *//'
+          dpkg-deb -f ../androlinx_*_all.deb Depends | grep -q 'scrcpy (>= 3.0)'
+          dpkg-deb -f ../androlinx_*_all.deb Depends | grep -q 'gir1.2-adw-1 (>= 1.7)'
+
+      # dpkg-buildpackage writes to the parent directory, which is outside the
+      # workspace, and upload-artifact rejects a path containing '..'. Copy the
+      # package in first, exactly as release.yml does.
+      - name: Collect the package
+        run: |
+          mkdir -p dist
+          cp ../androlinx_*_all.deb dist/
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: androlinx-deb
+          path: dist/*.deb

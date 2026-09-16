@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish the package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential debhelper dh-python pybuild-plugin-pyproject \
+            python3-all python3-setuptools fakeroot dpkg-dev
+
+      # The version lives in three places and they will drift. A .deb whose
+      # About dialog reports a different version than its filename is worse
+      # than a failed release, so this runs before anything is built.
+      - name: Check the version agrees everywhere
+        run: |
+          set -eu
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          tag="${tag#v}"
+          changelog=$(dpkg-parsechangelog -S Version)
+          pyproject=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml)
+          const=$(PYTHONPATH=src python3 -c 'import androlinx; print(androlinx.VERSION)')
+          echo "tag=$tag changelog=$changelog pyproject=$pyproject const=$const"
+          test "$tag" = "$changelog"
+          test "$tag" = "$pyproject"
+          test "$tag" = "$const"
+
+      - name: Run the test suite
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Build
+        run: dpkg-buildpackage -us -uc -b
+
+      # dpkg-buildpackage writes to the parent directory, which is outside the
+      # workspace and cannot be uploaded from there.
+      - name: Collect the artefacts
+        run: |
+          mkdir -p dist
+          cp ../androlinx_*_all.deb dist/
+          cd dist && sha256sum *.deb > SHA256SUMS
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            dist/*.deb
+            dist/SHA256SUMS
+          generate_release_notes: true

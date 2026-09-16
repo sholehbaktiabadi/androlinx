@@ -1,0 +1,36 @@
+Source: androlinx
+Section: utils
+Priority: optional
+Maintainer: sholehbaktiabadi <sholehbaktiabadi@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               pybuild-plugin-pyproject,
+               python3-all,
+               python3-setuptools
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/sholehbaktiabadi/androlinx
+
+Package: androlinx
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         adb,
+         gir1.2-adw-1 (>= 1.7),
+         gir1.2-gtk-4.0 (>= 4.12),
+         python3-gi,
+         scrcpy (>= 3.0)
+Recommends: android-sdk-platform-tools-common
+Description: desktop front-end for adb and scrcpy
+ AndroLinx puts a GTK4 interface on the two tools people already use to mirror
+ an Android phone to a Linux desktop. Phones appear and disappear in the sidebar
+ on their own, mirroring options live in named profiles instead of in your shell
+ history, and connecting over Wi-Fi is a dialog rather than three commands typed
+ in the right order.
+ .
+ A phone frame shows a live preview of the selected device, so you can see which
+ one you are about to mirror before starting. Recording to an MP4 is one button,
+ and anything already running is listed with a stop button beside it.
+ .
+ Mirroring itself is done by scrcpy, which opens its own window. AndroLinx finds
+ the devices, assembles the command, and shows exactly what it is going to run.

@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME = androlinx
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+# The tests are pure logic and spawn no processes, so they run happily in a
+# build chroot with no adb, no scrcpy and no display.
+override_dh_auto_test:
+	python3 -m unittest discover -s tests -v

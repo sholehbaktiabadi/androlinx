@@ -1,0 +1,53 @@
+.TH ANDROLINX 1 "September 2026" "androlinx 0.1.0" "User Commands"
+.SH NAME
+androlinx \- desktop front-end for adb and scrcpy
+.SH SYNOPSIS
+.B androlinx
+.RI [ OPTIONS ]
+.SH DESCRIPTION
+.B AndroLinx
+puts a graphical interface on
+.BR adb (1)
+and
+.BR scrcpy (1).
+Connected phones are listed as they appear, mirroring options are kept in named
+profiles, and connecting over Wi\-Fi is done from a dialog rather than by hand.
+.PP
+Mirroring itself is performed by scrcpy, which opens its own window. AndroLinx
+finds the devices, assembles the command line and shows it before running it;
+it does not embed or replace scrcpy's window.
+.PP
+Running AndroLinx with no options opens the window.
+.SH OPTIONS
+.TP
+.BR \-l ", " \-\-list
+List connected devices and exit, without opening the window.
+.TP
+.BR \-v ", " \-\-version
+Print the version and exit.
+.TP
+.BR \-h ", " \-\-help
+Print a summary of the options and exit.
+.SH FILES
+.TP
+.I ~/.config/androlinx/config.json
+Preferences, the last used device and profile, and recent wireless addresses.
+.TP
+.I ~/.config/androlinx/profiles.json
+Profiles you have saved. The built-in profiles are not stored here.
+.SH NOTES
+Under Wayland a compositor does not let an application place or raise another
+program's window, so scrcpy's
+.B \-\-always\-on\-top
+and window position options have no effect. Turning on X11 compatibility in
+Preferences runs scrcpy through XWayland, where they work again.
+.PP
+AndroLinx never runs
+.BR "adb kill-server" .
+Android Studio, Waydroid and Genymotion share the same adb server, and stopping
+it would disconnect them.
+.SH SEE ALSO
+.BR adb (1),
+.BR scrcpy (1)
+.SH AUTHOR
+sholehbaktiabadi

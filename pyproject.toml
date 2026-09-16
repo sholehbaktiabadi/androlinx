@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "androlinx"
+version = "0.1.0"
+description = "Desktop front-end for adb and scrcpy: mirror and control an Android phone from Ubuntu"
+readme = "README.md"
+requires-python = ">=3.10"
+# Kept as a table rather than the newer SPDX string form: the string needs
+# setuptools 77+, and the package is built with whatever setuptools the distro
+# ships. Ubuntu 24.04 has 68, which only understands this spelling.
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "sholehbaktiabadi", email = "sholehbaktiabadi@gmail.com" }]
+classifiers = [
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Utilities",
+]
+# PyGObject is deliberately left out: on Debian and Ubuntu it comes from the
+# python3-gi system package rather than PyPI. adb and scrcpy are ordinary
+# programs, not Python packages. See Depends in debian/control.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/sholehbaktiabadi/androlinx"
+Issues = "https://github.com/sholehbaktiabadi/androlinx/issues"
+
+[project.scripts]
+androlinx = "androlinx.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

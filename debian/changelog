@@ -1,0 +1,13 @@
+androlinx (0.1.0) unstable; urgency=medium
+
+  * First release.
+  * Live device list driven by the adb track-devices stream, with a polling
+    fallback so the application still works if that stream is unavailable.
+  * Pixel 9 device frame with a live screen preview, drawn rather than shipped
+    as an image so it stays sharp at any size and follows the system theme.
+  * Five built-in mirroring profiles, plus profiles of your own.
+  * Wireless connection and Android 11+ pairing, with mDNS discovery.
+  * Recording to MP4, stopped cleanly so the file stays playable.
+  * Plain-language diagnostics for the usual adb and scrcpy failures.
+
+ -- sholehbaktiabadi <sholehbaktiabadi@gmail.com>  Wed, 16 Sep 2026 10:00:00 +0700

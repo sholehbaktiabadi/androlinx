@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.sholehbaktiabadi.AndroLinx</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>AndroLinx</name>
+  <summary>Mirror and control an Android phone from your desktop</summary>
+
+  <developer id="io.github.sholehbaktiabadi">
+    <name>sholehbaktiabadi</name>
+  </developer>
+
+  <url type="homepage">https://github.com/sholehbaktiabadi/androlinx</url>
+  <url type="bugtracker">https://github.com/sholehbaktiabadi/androlinx/issues</url>
+
+  <description>
+    <p>
+      AndroLinx is a desktop front-end for adb and scrcpy. Phones appear and
+      disappear in the sidebar on their own, mirroring options live in named
+      profiles instead of in your shell history, and connecting over Wi-Fi is a
+      dialog rather than three commands typed in the right order.
+    </p>
+    <p>
+      A phone frame shows a live preview of the selected device, so you can see
+      which one you are about to mirror before you start. Recording to an MP4 is
+      one button, and anything already running is listed with a stop button next
+      to it.
+    </p>
+    <p>
+      Mirroring itself is done by scrcpy, which opens its own window. AndroLinx
+      finds your devices, assembles the command, and shows you exactly what it
+      is going to run.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.sholehbaktiabadi.AndroLinx.desktop</launchable>
+
+  <provides>
+    <binary>androlinx</binary>
+  </provides>
+
+  <categories>
+    <category>Utility</category>
+  </categories>
+
+  <requires>
+    <display_length compare="ge">400</display_length>
+  </requires>
+
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1.0" date="2026-09-16">
+      <description>
+        <p>First release.</p>
+      </description>
+    </release>
+  </releases>
+</component>
