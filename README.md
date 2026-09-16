@@ -10,6 +10,11 @@ dialog rather than three commands typed in the right order. And a phone frame
 shows a live preview of the selected device, so you can see which one you are
 about to mirror before you start.
 
+## App Preview
+
+<img width="667" height="680" alt="Screenshot From 2026-09-16 15-41-09" src="https://github.com/user-attachments/assets/446805a6-f3ab-4196-92f6-7f927d4c2e27" />
+
+
 ## What it does not do
 
 **AndroLinx does not replace scrcpy's window, and cannot wrap one.** scrcpy
